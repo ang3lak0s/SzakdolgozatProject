@@ -1,0 +1,59 @@
+/* ==========================================
+   Alapvető betűtípusok és renderelés
+   ========================================== */
+:root {
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --heading: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+
+  font-family: var(--sans);
+  color-scheme: dark; /* Megmondjuk a böngészőnek, hogy sötét témát használunk */
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ==========================================
+   Globális oldal beállítások
+   ========================================== */
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #0f172a; /* Elegáns sötétkék háttér, ami passzol a kártyákhoz */
+  color: #e5e7eb;
+}
+
+/* ==========================================
+   A fő Vue alkalmazás konténere (#app)
+   ========================================== */
+#app {
+  /* Itt a varázslat: a 'block' biztosítja, hogy fentről lefelé építkezzünk, 
+     ne pedig a képernyő közepére akarjon mindent bezsúfolni */
+  display: block; 
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+/* ==========================================
+   A főcím (Arduino Control Panel)
+   ========================================== */
+
+h1 {
+  font-family: var(--heading);
+  font-weight: 600;
+  text-align: center;
+  padding-top: 20px; /* 40px-ről lecsökkentve */
+  margin-top: 0;
+  margin-bottom: 5px; /* Kisebb távolság a panelektől */
+  font-size: 2rem; /* 2.5rem-ről kisebbre */
+  color: #f3f4f6;
+  letter-spacing: -0.5px;
+}
+/* Mobil reszponzivitás a főcímhez */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2rem;
+    padding-top: 20px;
+  }
+}
