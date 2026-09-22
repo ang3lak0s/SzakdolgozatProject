@@ -14,12 +14,15 @@
               <h2>{{ t('dashTitle') }}</h2>
               <p class="subtitle">{{ t('dashSubtitle') }}</p>
             </div>
-            <div class="port-connection-box">
-              <span class="status-indicator" :class="{ 'online': isConnected, 'offline': !isConnected }"></span>
-              <span class="status-text">{{ isConnected ? t('portConnected') : t('portDisconnected') }}</span>
-              <button @click="toggleSerial" class="btn-port" :class="{ 'connected': isConnected }">
-                {{ isConnected ? t('btnDisconnect') : t('btnConnect') }}
-              </button>
+            <div class="port-connection-wrapper">
+              <div class="port-connection-box">
+                <span class="status-indicator" :class="{ 'online': isConnected, 'offline': !isConnected }"></span>
+                <span class="status-text">{{ isConnected ? t('portConnected') : t('portDisconnected') }}</span>
+                <button @click="toggleSerial" class="btn-port" :class="{ 'connected': isConnected }">
+                  {{ isConnected ? t('btnDisconnect') : t('btnConnect') }}
+                </button>
+              </div>
+              <span class="linux-hint">{{ t('linuxDialoutHint') }}</span>
             </div>
           </div>
 
@@ -32,8 +35,8 @@
             <div class="step-divider" :class="{ 'filled': currentStep > 1 }"></div>
             <div class="step-item" :class="{ 'active': currentStep >= 2, 'current': currentStep === 2, 'done': currentStep > 2, 'failed': diagState.result === 'FAIL' }">
               <div class="step-circle">
-                <span v-if="diagState.result === 'PASS'">✓</span>
-                <span v-else-if="diagState.result === 'FAIL'">✕</span>
+                <span v-if="diagState.result === 'PASS'">PASS</span>
+                <span v-else-if="diagState.result === 'FAIL'">FAIL</span>
                 <span v-else>2</span>
               </div>
               <div class="step-label">{{ t('step2') }}</div>
@@ -59,10 +62,10 @@
 
             <!-- Diag Trigger Buttons -->
             <div class="diag-action-bar">
-              <button @click="startDiagnostics(false)" :disabled="!isConnected || diagState.status === 'RUNNING'" class="btn-sub btn-diag">
+              <button @click="startDiagnostics(false)" :disabled="!isConnected || diagState.status === 'RUNNING' || isFlashing" class="btn-sub btn-diag">
                 {{ t('btnStartDiag') }}
               </button>
-              <button @click="startDiagnostics(true)" :disabled="!isConnected || diagState.status === 'RUNNING'" class="btn-sub btn-fault" :title="t('btnSimFaultTitle')">
+              <button @click="startDiagnostics(true)" :disabled="!isConnected || diagState.status === 'RUNNING' || isFlashing" class="btn-sub btn-fault" :title="t('btnSimFaultTitle')">
                 {{ t('btnSimFault') }}
               </button>
             </div>
@@ -152,8 +155,14 @@
           <!-- Diagnostic Result Alert Banner -->
           <div v-if="diagState.result" class="diag-banner" :class="{ 'pass-banner': diagState.result === 'PASS', 'fail-banner': diagState.result === 'FAIL' }">
             <div class="banner-icon">
-              <span v-if="diagState.result === 'PASS'">✅</span>
-              <span v-else>⚠️</span>
+              <svg v-if="diagState.result === 'PASS'" class="banner-status-svg pass-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <svg v-else class="banner-status-svg fail-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path>
+                <line x1="12" y1="9" x2="12" y2="13"></line>
+                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+              </svg>
             </div>
             <div class="banner-text">
               <strong>{{ diagState.result === 'PASS' ? t('diagPassTitle') : t('diagFailTitle') }}</strong>
@@ -181,7 +190,11 @@
               <label>{{ t('selectedPresetLabel') }}</label>
               <div v-if="loadedFirmwareUrl" class="loaded-firmware-banner">
                 <div class="file-meta">
-                  <span class="file-icon">📦</span>
+                  <svg class="file-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
+                    <line x1="12" y1="22.08" x2="12" y2="12"></line>
+                  </svg>
                   <strong>{{ presetName || 'Preset' }}</strong>
                   <span class="file-name">({{ getFilename(loadedFirmwareUrl) }})</span>
                 </div>
@@ -191,7 +204,11 @@
               <div v-else class="file-upload-wrapper">
                 <input type="file" @change="handleFileChange" accept=".hex,.bin" ref="fileInput" id="firmwareUpload" class="file-input-hidden" />
                 <label for="firmwareUpload" class="file-upload-dropzone">
-                  <span class="upload-icon">📁</span>
+                  <svg class="upload-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" y1="3" x2="12" y2="15"></line>
+                  </svg>
                   <span v-if="firmwareFile">{{ firmwareFile.name }} ({{ (firmwareFile.size / 1024).toFixed(1) }} KB)</span>
                   <span v-else>{{ t('dropzoneText') }}</span>
                 </label>
@@ -208,6 +225,17 @@
                 <label>{{ t('presetDescLabel') }}</label>
                 <input type="text" v-model="presetDescription" :placeholder="t('presetDescPlaceholder')" class="text-input" />
               </div>
+            </div>
+          </div>
+
+          <!-- Flashing Progress Bar -->
+          <div v-if="isFlashing" class="flashing-progress-box">
+            <div class="flashing-progress-bar-bg">
+              <div class="flashing-progress-bar-fill" :style="{ width: `${flashProgress}%` }"></div>
+            </div>
+            <div class="flashing-progress-labels">
+              <span>STK500 Bootloader Flashing</span>
+              <span>{{ flashProgress }}%</span>
             </div>
           </div>
 
@@ -235,7 +263,7 @@
               type="button"
               class="btn-master btn-save-preset"
               @click="savePreset"
-              :disabled="isUploading || !firmwareFile || !presetName"
+              :disabled="isUploading || isFlashing || !firmwareFile || !presetName"
             >
               <span>{{ isUploading ? t('btnSaving') : t('btnSavePreset') }}</span>
             </button>
@@ -278,9 +306,9 @@
               v-model="customCommand"
               :placeholder="t('cmdPlaceholder')"
               class="command-input"
-              :disabled="!isConnected"
+              :disabled="!isConnected || isFlashing"
             />
-            <button type="submit" class="btn-send-cmd" :disabled="!isConnected || !customCommand">{{ t('btnSendCmd') }}</button>
+            <button type="submit" class="btn-send-cmd" :disabled="!isConnected || !customCommand || isFlashing">{{ t('btnSendCmd') }}</button>
           </form>
         </div>
 
@@ -294,7 +322,12 @@
         <!-- User Profile Card -->
         <div class="card glass-card user-card">
           <div class="user-card-header">
-            <div class="user-avatar">👤</div>
+            <div class="user-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="user-svg">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
             <div class="user-info">
               <h4>{{ t('userPanelTitle') }}</h4>
               <span class="user-status-pill">{{ t('userLoggedIn') }}</span>
@@ -332,7 +365,11 @@
           </div>
 
           <div v-else class="empty-presets-state">
-            <div class="empty-icon">📁</div>
+            <div class="empty-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="empty-svg">
+                <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+              </svg>
+            </div>
             <p>{{ t('emptyPresetsTitle') }}</p>
             <span class="empty-sub">{{ t('emptyPresetsSub') }}</span>
           </div>
@@ -357,6 +394,7 @@
 <script>
 import axios from 'axios';
 import { t } from '../i18n';
+import { flashFirmwareSTK500 } from '../utils/stk500';
 
 export default {
   data() {
@@ -376,6 +414,8 @@ export default {
       currentStep: 1,
       isFlashing: false,
       isFlashingDone: false,
+      flashProgress: 0,
+      isPausedForFlashing: false,
 
       // Serial Connection State
       port: null,
@@ -487,11 +527,29 @@ export default {
       this.writeToLog('>> [KAPCSOLAT / CONNECTION] ' + (this.t('portDisconnected')) + '.\n');
     },
 
+    async pauseSerialReader() {
+      this.isPausedForFlashing = true;
+      if (this.reader) {
+        try {
+          await this.reader.cancel();
+        } catch (_) {}
+      }
+      // Small pause to guarantee lock is released
+      await new Promise(r => setTimeout(r, 60));
+    },
+
+    resumeSerialReader() {
+      this.isPausedForFlashing = false;
+      if (this.isConnected && this.port && this.port.readable) {
+        this.readSerialLoop();
+      }
+    },
+
     async readSerialLoop() {
       let buffer = '';
-      while (this.port && this.port.readable && this.isConnected) {
-        this.reader = this.port.readable.getReader();
+      while (this.port && this.port.readable && this.isConnected && !this.isPausedForFlashing) {
         try {
+          this.reader = this.port.readable.getReader();
           while (true) {
             const { value, done } = await this.reader.read();
             if (done) break;
@@ -512,11 +570,16 @@ export default {
             }
           }
         } catch (error) {
-          if (this.isConnected) {
+          if (this.isConnected && !this.isPausedForFlashing) {
             console.error('Serial stream read error:', error);
           }
         } finally {
-          this.reader.releaseLock();
+          if (this.reader) {
+            try {
+              this.reader.releaseLock();
+            } catch (_) {}
+            this.reader = null;
+          }
         }
       }
     },
@@ -536,7 +599,7 @@ export default {
     },
 
     async sendCustomCommand() {
-      if (!this.customCommand || !this.isConnected) return;
+      if (!this.customCommand || !this.isConnected || this.isFlashing) return;
       await this.sendSerialText(this.customCommand);
       this.customCommand = '';
     },
@@ -546,7 +609,6 @@ export default {
       const writer = this.port.writable.getWriter();
       try {
         const encoder = new TextEncoder();
-        // Leading and trailing newline ensures cleanly framed serial command
         await writer.write(encoder.encode('\n' + text.trim() + '\n'));
       } finally {
         writer.releaseLock();
@@ -615,32 +677,25 @@ export default {
       });
 
       if (category === 'START') {
+        this.resetDiagnosticState();
         this.diagState.status = 'RUNNING';
       } else if (category === 'RAM') {
-        this.diagState.ram.free = parseInt(params.FREE) || null;
-        this.diagState.ram.total = parseInt(params.TOTAL) || 2048;
+        this.diagState.ram.free = parseInt(params.FREE, 10);
+        this.diagState.ram.total = parseInt(params.TOTAL || '2048', 10);
         this.diagState.ram.status = params.STATUS || 'OK';
       } else if (category === 'VCC') {
-        this.diagState.vcc.volts = parseFloat(params.VOLTS) || null;
+        this.diagState.vcc.volts = parseFloat(params.VOLTS);
         this.diagState.vcc.status = params.STATUS || 'OK';
       } else if (category === 'GPIO') {
-        const pin = parseInt(params.PIN);
-        if (pin) {
-          this.diagState.gpio[pin] = params.STATE || 'OK';
-        }
+        const pin = parseInt(params.PIN, 10);
+        this.diagState.gpio[pin] = params.STATE || params.STATUS || 'OK';
       } else if (category === 'ANALOG') {
         const pin = params.PIN;
-        if (pin) {
-          this.diagState.analog[pin] = parseInt(params.RAW) || 0;
-        }
-      } else if (category === 'I2C_DEV') {
-        if (params.ADDR && !this.diagState.i2c.devices.includes(params.ADDR)) {
-          this.diagState.i2c.devices.push(params.ADDR);
-        }
+        this.diagState.analog[pin] = parseInt(params.RAW, 10);
       } else if (category === 'I2C') {
-        this.diagState.i2c.sda = params.SDA || 'OK';
-        this.diagState.i2c.scl = params.SCL || 'OK';
-        this.diagState.i2c.status = `${params.DEVICES || this.diagState.i2c.devices.length} devices`;
+        this.diagState.i2c.status = `${params.SDA || 'OK'}/${params.SCL || 'OK'}`;
+      } else if (category === 'I2C_DEV') {
+        if (params.ADDR) this.diagState.i2c.devices.push(params.ADDR);
       } else if (category === 'CLOCK') {
         this.diagState.clock.freq = params.FREQ || '16 MHz';
         this.diagState.clock.status = params.STATUS || 'OK';
@@ -650,15 +705,12 @@ export default {
           this.diagTimeout = null;
         }
         this.diagState.status = 'COMPLETED';
-        this.diagState.result = params.RESULT || 'PASS';
-        this.diagState.totalChecks = parseInt(params.CHECKS) || 0;
-        this.diagState.failedChecks = parseInt(params.FAILED) || 0;
+        this.diagState.result = params.RESULT === 'PASS' ? 'PASS' : 'FAIL';
+        this.diagState.totalChecks = parseInt(params.CHECKS || '21', 10);
+        this.diagState.failedChecks = parseInt(params.FAILED || '0', 10);
 
         if (this.diagState.result === 'PASS') {
-          this.writeToLog('>> [DIAGNOSTICS] All self-tests passed (PASS).\n');
           this.currentStep = 3;
-        } else {
-          this.writeToLog('>> [DIAGNOSTICS] Warning: Hardware fault detected (FAIL).\n');
         }
       }
     },
@@ -666,37 +718,38 @@ export default {
     getPinBadgeClass(pin) {
       const state = this.diagState.gpio[pin];
       if (!state) return 'pin-idle';
-      if (state === 'OK') return 'pin-ok';
-      if (state === 'TESTING') return 'pin-testing';
-      return 'pin-fault';
+      if (state === 'TESTING') return 'pin-testing pulse';
+      if (state === 'OK') return 'pin-pass';
+      return 'pin-fail';
     },
 
     getPinStateText(pin) {
       const state = this.diagState.gpio[pin];
       if (!state) return t('pinStateIdle');
-      if (state === 'OK') return 'OK';
       if (state === 'TESTING') return t('pinStateTesting');
+      if (state === 'OK') return 'OK';
       return state;
     },
 
     getAnalogPinBadgeClass(aPin) {
       const val = this.diagState.analog[aPin];
       if (val === undefined) return 'pin-idle';
-      return 'pin-ok';
+      return 'pin-pass';
     },
 
     getAnalogPinStateText(aPin) {
       const val = this.diagState.analog[aPin];
-      if (val === undefined) return '--';
-      return `${val}`;
+      if (val === undefined) return t('pinStateIdle');
+      return `${val} (OK)`;
     },
 
     // =========================================================================
-    // Stage 2: Target Firmware Flashing & Master Workflow
+    // Stage 2: Target Firmware Flashing (STK500 Bootloader Protocol)
     // =========================================================================
     async runTwoStageVerificationAndFlash() {
-      if (!this.isConnected) {
-        alert(t('msgPortError'));
+      if (!this.isConnected || !this.port) {
+        this.flashMessage = t('msgPortError');
+        this.isError = true;
         return;
       }
       if (!this.firmwareFile && !this.loadedFirmwareUrl) {
@@ -705,15 +758,12 @@ export default {
         return;
       }
 
-      this.flashMessage = '';
-      this.isError = false;
+      this.writeToLog('\n========================================================\n');
+      this.writeToLog('>> [2-STAGE VERIFICATION] Stage 1: Initiating Hardware Self-Test...\n');
 
-      // 1. Fázis: Diagnosztika indítása
-      this.writeToLog('\n=======================================================\n');
-      this.writeToLog('>> [2-STAGE VERIFICATION] Stage 1: Starting hardware diagnostics...\n');
+      // 1. Fázis: Diagnosztika futtatása
       await this.startDiagnostics(false);
 
-      // Wait for diagnostic completion
       const startTime = Date.now();
       const waitForDiag = () =>
         new Promise(resolve => {
@@ -734,8 +784,8 @@ export default {
         return;
       }
 
-      // 2. Fázis: Target Firmware égetése
-      this.writeToLog('>> [2-STAGE VERIFICATION] Stage 2: Hardware verified, flashing target firmware...\n');
+      // 2. Fázis: Target Firmware égetése STK500 protokollal
+      this.writeToLog('>> [2-STAGE VERIFICATION] Stage 2: Hardware verified, flashing target firmware via STK500...\n');
       await this.flashTargetFirmwareDirectly();
     },
 
@@ -753,29 +803,34 @@ export default {
 
       this.isFlashing = true;
       this.isFlashingDone = false;
+      this.flashProgress = 0;
       this.flashMessage = t('badgeFlashing');
       this.isError = false;
 
       try {
-        let fileBuffer;
+        let hexText;
         if (this.firmwareFile) {
-          fileBuffer = await this.firmwareFile.arrayBuffer();
+          hexText = await this.firmwareFile.text();
         } else if (this.loadedFirmwareUrl) {
           const response = await fetch(`http://127.0.0.1:8000${this.loadedFirmwareUrl}`);
-          fileBuffer = await response.arrayBuffer();
+          hexText = await response.text();
         }
 
-        const writer = this.port.writable.getWriter();
-        try {
-          this.writeToLog('>> [FLASH] Transferring firmware bytes to microcontroller...\n');
-          await writer.write(new Uint8Array(fileBuffer));
-          // Always ensure trailing newline delimiter after firmware stream
-          const encoder = new TextEncoder();
-          await writer.write(encoder.encode('\n'));
-          await new Promise(r => setTimeout(r, 400));
-        } finally {
-          writer.releaseLock();
-        }
+        await this.pauseSerialReader();
+
+        this.writeToLog('\n>> [STK500] Initializing Optiboot bootloader flasher...\n');
+
+        const result = await flashFirmwareSTK500(this.port, hexText, {
+          onProgress: (p) => {
+            this.flashProgress = p.percent;
+            if (p.phase === 'PROGRAMMING') {
+              this.flashMessage = `${t('badgeFlashing')} (${p.current}/${p.total} pages - ${p.percent}%)`;
+            }
+          },
+          onLog: (msg) => {
+            this.writeToLog(msg + '\n');
+          }
+        });
 
         this.isFlashingDone = true;
         this.flashMessage = t('msgFlashSuccess');
@@ -787,9 +842,9 @@ export default {
         this.writeToLog(`>> [FLASH ERROR] ${err.message}\n`);
       } finally {
         this.isFlashing = false;
+        this.resumeSerialReader();
       }
     },
-
 
     // =========================================================================
     // Preset Management
@@ -950,6 +1005,19 @@ h2 {
   color: #94a3b8;
 }
 
+.port-connection-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 5px;
+}
+
+.linux-hint {
+  font-size: 0.72rem;
+  color: #64748b;
+  line-height: 1.2;
+}
+
 .port-connection-box {
   display: flex;
   align-items: center;
@@ -1038,16 +1106,16 @@ h2 {
   height: 28px;
   border-radius: 50%;
   background: #334155;
+  color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: white;
+  font-size: 0.75rem;
+  font-weight: 800;
 }
 
 .step-label {
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 600;
   color: #e2e8f0;
 }
@@ -1064,50 +1132,40 @@ h2 {
 }
 
 /* =========================================================================
-   Diagnostic HUD (Stage 1)
+   STAGE 1: Diagnostic HUD Styles
    ========================================================================= */
 .card-header-flex {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
+}
+
+.title-with-badge {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 h3 {
   margin: 0;
   font-size: 1.15rem;
   font-weight: 700;
-  color: #f8fafc;
-}
-
-.title-with-badge {
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  color: #f1f5f9;
 }
 
 .badge {
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  letter-spacing: 0.3px;
+  padding: 3px 8px;
+  border-radius: 6px;
   text-transform: uppercase;
+  letter-spacing: 0.4px;
 }
 .badge-idle { background: #334155; color: #94a3b8; }
-.badge-running { background: #3b82f6; color: white; }
-.badge-success { background: #059669; color: #d1fae5; }
-.badge-danger { background: #dc2626; color: #fee2e2; }
-
-.pulse {
-  animation: pulseAnim 1.5s infinite;
-}
-@keyframes pulseAnim {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
+.badge-running { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; }
+.badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
+.badge-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
 
 .diag-action-bar {
   display: flex;
@@ -1115,67 +1173,70 @@ h3 {
 }
 
 .btn-sub {
-  border: none;
-  padding: 7px 12px;
-  border-radius: 7px;
-  font-size: 0.82rem;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
+  border: none;
   transition: all 0.2s ease;
 }
-.btn-diag { background: #2563eb; color: white; }
-.btn-diag:hover:not(:disabled) { background: #1d4ed8; }
-.btn-fault { background: #475569; color: #cbd5e1; }
-.btn-fault:hover:not(:disabled) { background: #64748b; color: white; }
+.btn-diag { background: #0284c7; color: white; }
+.btn-diag:hover:not(:disabled) { background: #0369a1; }
+.btn-fault { background: #475569; color: #f1f5f9; }
+.btn-fault:hover:not(:disabled) { background: #334155; }
 .btn-sub:disabled { opacity: 0.5; cursor: not-allowed; }
 
-/* Telemetry Gauges Grid */
+/* Telemetry Gauges */
 .telemetry-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .telemetry-box {
-  background: #1e293b;
-  border: 1px solid #334155;
+  background: #0f172a;
+  border: 1px solid #1e293b;
   border-radius: 10px;
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  justify-content: space-between;
 }
 
 .telemetry-label {
-  font-size: 0.76rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  text-transform: uppercase;
   color: #94a3b8;
+  margin-bottom: 4px;
 }
 
 .telemetry-val {
-  font-size: 1.35rem;
+  font-size: 1.18rem;
   font-weight: 800;
-  color: #f1f5f9;
-}
-.telemetry-sub {
-  font-size: 0.75rem;
-  color: #64748b;
+  color: #f8fafc;
+  font-family: monospace;
 }
 
-.text-emerald { color: #10b981; }
-.text-amber { color: #f59e0b; }
-.text-rose { color: #f43f5e; }
-.text-cyan { color: #06b6d4; }
-.text-violet { color: #a855f7; }
+.telemetry-sub {
+  font-size: 0.72rem;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.text-emerald { color: #34d399; }
+.text-amber { color: #fbbf24; }
+.text-rose { color: #f87171; }
+.text-cyan { color: #38bdf8; }
+.text-violet { color: #a78bfa; }
 
 .progress-bar-bg {
   width: 100%;
   height: 4px;
-  background: #334155;
+  background: #1e293b;
   border-radius: 2px;
-  margin-top: 4px;
+  margin-top: 6px;
   overflow: hidden;
 }
 .progress-bar-fill {
@@ -1190,147 +1251,112 @@ h3 {
   border: 1px solid #1e293b;
   border-radius: 10px;
   padding: 14px;
-  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .matrix-title {
   font-size: 0.8rem;
   font-weight: 700;
   color: #cbd5e1;
-  margin-bottom: 10px;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.4px;
 }
 
 .pin-group {
   display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 8px;
+  flex-direction: column;
+  gap: 6px;
 }
-.pin-group:last-child { margin-bottom: 0; }
 
 .group-tag {
-  font-size: 0.78rem;
+  font-size: 0.72rem;
+  color: #64748b;
   font-weight: 600;
-  color: #94a3b8;
-  width: 110px;
-  flex-shrink: 0;
 }
 
 .pins-row {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
-  flex-grow: 1;
 }
 
 .pin-badge {
+  padding: 4px 8px;
+  border-radius: 6px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  padding: 4px 8px;
-  border-radius: 6px;
-  min-width: 44px;
-  border: 1px solid transparent;
+  min-width: 48px;
+  font-family: monospace;
   transition: all 0.2s ease;
 }
+.pin-num { font-size: 0.75rem; font-weight: 700; }
+.pin-state { font-size: 0.65rem; }
 
-.pin-num {
-  font-size: 0.78rem;
-  font-weight: 800;
-}
-.pin-state {
-  font-size: 0.65rem;
-  font-weight: 600;
-}
+.pin-idle { background: #1e293b; color: #64748b; }
+.pin-testing { background: #172554; color: #60a5fa; border: 1px solid #3b82f6; }
+.pin-pass { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
+.pin-fail { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
 
-.pin-idle {
-  background: #1e293b;
-  color: #64748b;
-  border-color: #334155;
-}
-.pin-testing {
-  background: rgba(59, 130, 246, 0.2);
-  color: #60a5fa;
-  border-color: #3b82f6;
-  animation: pulseAnim 1s infinite;
-}
-.pin-ok {
-  background: rgba(16, 185, 129, 0.18);
-  color: #34d399;
-  border-color: rgba(52, 211, 153, 0.4);
-}
-.pin-fault {
-  background: rgba(239, 68, 68, 0.25);
-  color: #f87171;
-  border-color: #ef4444;
-  animation: pulseAnim 1.2s infinite;
-}
-
-/* Diagnostic Result Banner */
+/* Alert Banner */
 .diag-banner {
-  display: flex;
-  gap: 12px;
+  margin-top: 15px;
   padding: 12px 16px;
   border-radius: 10px;
-  align-items: flex-start;
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
-.pass-banner {
-  background: rgba(5, 150, 105, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  color: #a7f3d0;
-}
-.fail-banner {
-  background: rgba(220, 38, 38, 0.18);
-  border: 1px solid rgba(239, 68, 68, 0.4);
-  color: #fecaca;
-}
-
-.banner-icon { font-size: 1.3rem; }
+.pass-banner { background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; }
+.fail-banner { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171; }
+.banner-icon { display: flex; align-items: center; justify-content: center; }
+.banner-status-svg { width: 22px; height: 22px; }
 .banner-text strong { display: block; font-size: 0.92rem; margin-bottom: 2px; }
-.banner-text p { margin: 0; font-size: 0.82rem; line-height: 1.4; opacity: 0.9; }
+.banner-text p { margin: 0; font-size: 0.8rem; opacity: 0.9; }
 
 /* =========================================================================
-   Stage 2: Target Firmware & Flasher
+   STAGE 2: Flash Form & Flashing Controls
    ========================================================================= */
+.flash-card {
+  display: flex;
+  flex-direction: column;
+}
+
 .flash-form-grid {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  margin-bottom: 18px;
+  margin-bottom: 16px;
 }
 
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
 .form-group label {
-  display: block;
   font-size: 0.8rem;
   font-weight: 600;
   color: #cbd5e1;
-  margin-bottom: 6px;
 }
 
 .form-row-2col {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 14px;
+  gap: 12px;
 }
 
 .text-input {
-  width: 100%;
-  padding: 10px 12px;
   background: #0f172a;
   border: 1px solid #334155;
+  padding: 10px 12px;
   border-radius: 8px;
-  color: #f8fafc;
+  color: white;
   font-size: 0.88rem;
-  box-sizing: border-box;
 }
-.text-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
-}
+.text-input:focus { outline: none; border-color: #3b82f6; }
 
 .file-input-hidden { display: none; }
 
@@ -1354,6 +1380,12 @@ h3 {
   background: #172554;
 }
 
+.upload-icon-svg {
+  width: 24px;
+  height: 24px;
+  color: #94a3b8;
+}
+
 .loaded-firmware-banner {
   display: flex;
   justify-content: space-between;
@@ -1370,6 +1402,11 @@ h3 {
   font-size: 0.88rem;
   color: #f1f5f9;
 }
+.file-icon-svg {
+  width: 20px;
+  height: 20px;
+  color: #60a5fa;
+}
 .file-name { color: #94a3b8; font-size: 0.82rem; }
 
 .btn-text-clear {
@@ -1381,6 +1418,37 @@ h3 {
   cursor: pointer;
 }
 .btn-text-clear:hover { text-decoration: underline; }
+
+/* Flashing Progress Bar */
+.flashing-progress-box {
+  background: #0f172a;
+  border: 1px solid #1e293b;
+  border-radius: 8px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.flashing-progress-bar-bg {
+  width: 100%;
+  height: 6px;
+  background: #1e293b;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.flashing-progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #10b981);
+  transition: width 0.2s ease;
+}
+.flashing-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  color: #94a3b8;
+  font-weight: 600;
+}
 
 /* Master Action Buttons */
 .master-action-row {
@@ -1565,7 +1633,11 @@ h3 {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+}
+.user-svg {
+  width: 20px;
+  height: 20px;
+  color: #94a3b8;
 }
 
 .user-info h4 {
@@ -1697,7 +1769,16 @@ h3 {
   padding: 30px 10px;
   color: #64748b;
 }
-.empty-icon { font-size: 2rem; margin-bottom: 8px; }
+.empty-icon {
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: center;
+}
+.empty-svg {
+  width: 38px;
+  height: 38px;
+  color: #475569;
+}
 .empty-presets-state p { margin: 0; font-size: 0.88rem; color: #94a3b8; }
 .empty-sub { font-size: 0.76rem; display: block; margin-top: 4px; }
 
@@ -1747,5 +1828,6 @@ h3 {
     align-items: flex-start;
   }
   .step-divider { display: none; }
+  .port-connection-wrapper { align-items: flex-start; }
 }
 </style>

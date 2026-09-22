@@ -28,18 +28,19 @@ export const translations = {
     portDisconnected: 'Nincs Kapcsolat',
     btnConnect: 'Csatlakozás (COM Port)',
     btnDisconnect: 'Leválasztás',
+    linuxDialoutHint: 'Linux: Port hozzáférési hiba esetén dialout csoporttagság lehet szükséges.',
     step1: '1. Hardver Kapcsolat',
     step2: '2. Hardver Diagnosztika',
     step3: '3. Target Firmware Flash',
 
     // Stage 1: Diagnostic HUD
-    stage1Title: '⚡ 1. Fázis: Hardver Diagnosztikai HUD',
+    stage1Title: '1. Fázis: Hardver Diagnosztikai HUD',
     badgeIdle: 'Készenlétben',
     badgeRunning: 'Diagnosztika fut...',
     badgeSuccess: 'MINDEN TESZT SIKERES',
     badgeDanger: 'HIBA DETEKTÁLVA',
-    btnStartDiag: '🔍 Diagnosztika Indítása',
-    btnSimFault: '🧪 Hiba-szimuláció',
+    btnStartDiag: 'Diagnosztika Indítása',
+    btnSimFault: 'Hiba-szimuláció',
     btnSimFaultTitle: 'Szimulál egy sérült pint / alacsony feszültséget a biztonsági reteszelés teszteléséhez',
 
     // Telemetry Gauges
@@ -68,26 +69,26 @@ export const translations = {
     diagFailDesc: (failed) => `A diagnosztika hibát detektált (${failed} hiba). A szoftveres reteszelés megakadályozza a sérült áramkörre történő égetést.`,
 
     // Stage 2: Target Flash & Presets
-    stage2Title: '🚀 2. Fázis: Target Firmware Égetés & Vezérlés',
-    badgeFlashing: 'Égetés folyamatban...',
+    stage2Title: '2. Fázis: Target Firmware Égetés & Vezérlés',
+    badgeFlashing: 'Égetés folyamatban (STK500)...',
     badgeFirmwareRunning: 'Firmware Fut',
     selectedPresetLabel: 'Kiválasztott Preset / Firmware fájl:',
-    changeFileBtn: '✕ Fájl csere',
+    changeFileBtn: 'Fájl csere',
     dropzoneText: 'Kattints ide saját .hex vagy .bin fájl feltöltéséhez',
     presetNameLabel: 'Preset Elnevezése (Mentéshez):',
     presetNamePlaceholder: 'pl. Időjárás Állomás v1.2',
     presetDescLabel: 'Leírás / Célkártya (Opcionális):',
     presetDescPlaceholder: 'pl. Arduino Uno Rev3, I2C Szenzorok',
-    btnTwoStageFlash: '⚡ 2-Lépéses Diagnosztika & Flash',
-    btnDirectFlash: 'Égetés (Közvetlen)',
-    btnSavePreset: '💾 Preset Mentése',
+    btnTwoStageFlash: '2-Lépéses Diagnosztika & Flash',
+    btnDirectFlash: 'Égetés (Közvetlen STK500)',
+    btnSavePreset: 'Preset Mentése',
     btnSaving: 'Mentés...',
 
     // Flashing Messages
     msgSelectHexError: 'Hiba: Válassz vagy tölts be egy .hex firmware fájlt!',
     msgPortError: 'Hiba: Nincs nyitott COM port kapcsolat.',
     msgDiagHaltError: 'Biztonsági leállás: A diagnosztika hibát jelzett, az égetés megszakadt.',
-    msgFlashSuccess: 'Sikeres égetés! A target firmware fut a mikrokontrolleren.',
+    msgFlashSuccess: 'Sikeres égetés (STK500)! A target firmware fut a mikrokontrolleren.',
     msgFlashError: 'Hiba történt az égetés során: ',
     msgPresetLoaded: (name) => `Preset betöltve: "${name}"`,
     msgPresetSaved: 'Sikeres mentés! A preset hozzáadva a listához.',
@@ -97,7 +98,7 @@ export const translations = {
 
     // Serial Monitor
     monitorTitle: 'Valós Idejű Soros Monitor (115200 Baud)',
-    btnClearLog: '🗑️ Törlés',
+    btnClearLog: 'Törlés',
     autoscroll: 'Auto-görgetés',
     consolePlaceholder: 'Csatlakozz a COM porthoz az adatfolyam megtekintéséhez...',
     cmdPlaceholder: 'Parancs küldése (pl. CMD:PING vagy CMD:DIAG_START)...',
@@ -111,14 +112,14 @@ export const translations = {
     presetCountBadge: (count) => `${count} db`,
     hexAttachedTag: '.HEX fájl csatolva',
     btnLoadPreset: 'Betöltés',
-    btnLoadedPreset: 'Betöltve ✓',
+    btnLoadedPreset: 'Betöltve',
     emptyPresetsTitle: 'Még nincsenek mentett presetjeid.',
     emptyPresetsSub: 'Tölts fel egy .hex fájlt és mentsd el a bal oldali űrlapon!',
 
     // Guide Card
-    guideTitle: '💡 Kétlépéses Rendszer Működése',
+    guideTitle: 'Kétlépéses Rendszer Működése',
     guidePoint1: '1. Diagnosztika: A tesztelő rutin automatikusan ellenőrzi a szabad memóriát, tápfeszültséget és I/O pineket.',
-    guidePoint2: '2. Flash: Ha minden teszt sikeres, a tiszta felhasználói firmware kerül égetésre nulla módosítással.',
+    guidePoint2: '2. Flash: Ha minden teszt sikeres, a tiszta felhasználói firmware kerül égetésre STK500 protokollal.',
     guidePoint3: 'Hardver védelem: Hibás pin vagy túlfeszültség esetén a rendszer leállítja az égetést.'
   },
 
@@ -151,18 +152,19 @@ export const translations = {
     portDisconnected: 'No Connection',
     btnConnect: 'Connect (COM Port)',
     btnDisconnect: 'Disconnect',
+    linuxDialoutHint: 'Linux: If port access fails, dialout group membership may be required.',
     step1: '1. Hardware Connection',
     step2: '2. Hardware Diagnostics',
     step3: '3. Target Firmware Flash',
 
     // Stage 1: Diagnostic HUD
-    stage1Title: '⚡ Stage 1: Hardware Diagnostic HUD',
+    stage1Title: 'Stage 1: Hardware Diagnostic HUD',
     badgeIdle: 'Idle',
     badgeRunning: 'Running diagnostics...',
     badgeSuccess: 'ALL CHECKS PASSED',
     badgeDanger: 'FAULT DETECTED',
-    btnStartDiag: '🔍 Run Diagnostics',
-    btnSimFault: '🧪 Fault Injection',
+    btnStartDiag: 'Run Diagnostics',
+    btnSimFault: 'Fault Injection',
     btnSimFaultTitle: 'Simulates a faulty pin / undervoltage condition to test safety interlock',
 
     // Telemetry Gauges
@@ -191,26 +193,26 @@ export const translations = {
     diagFailDesc: (failed) => `Diagnostics detected critical errors (${failed} faults). The safety interlock has halted flashing to protect circuitry.`,
 
     // Stage 2: Target Flash & Presets
-    stage2Title: '🚀 Stage 2: Target Firmware Flashing & Control',
-    badgeFlashing: 'Flashing in progress...',
+    stage2Title: 'Stage 2: Target Firmware Flashing & Control',
+    badgeFlashing: 'Flashing in progress (STK500)...',
     badgeFirmwareRunning: 'Firmware Running',
     selectedPresetLabel: 'Selected Preset / Firmware File:',
-    changeFileBtn: '✕ Replace File',
+    changeFileBtn: 'Replace File',
     dropzoneText: 'Click here to upload your .hex or .bin file',
     presetNameLabel: 'Preset Name (For Saving):',
     presetNamePlaceholder: 'e.g. Weather Station v1.2',
     presetDescLabel: 'Description / Target Board (Optional):',
     presetDescPlaceholder: 'e.g. Arduino Uno Rev3, I2C Sensors',
-    btnTwoStageFlash: '⚡ 2-Stage Verification & Flash',
-    btnDirectFlash: 'Flash (Direct)',
-    btnSavePreset: '💾 Save Preset',
+    btnTwoStageFlash: '2-Stage Verification & Flash',
+    btnDirectFlash: 'Flash (Direct STK500)',
+    btnSavePreset: 'Save Preset',
     btnSaving: 'Saving...',
 
     // Flashing Messages
     msgSelectHexError: 'Error: Please select or load a .hex firmware file!',
     msgPortError: 'Error: No active COM port connection.',
     msgDiagHaltError: 'Safety Halt: Diagnostics reported faults, flashing aborted.',
-    msgFlashSuccess: 'Flashing successful! Target firmware is active on the microcontroller.',
+    msgFlashSuccess: 'Flashing successful (STK500)! Target firmware is active on the microcontroller.',
     msgFlashError: 'An error occurred during flashing: ',
     msgPresetLoaded: (name) => `Preset loaded: "${name}"`,
     msgPresetSaved: 'Saved successfully! Preset added to your library.',
@@ -220,7 +222,7 @@ export const translations = {
 
     // Serial Monitor
     monitorTitle: 'Real-Time Serial Monitor (115200 Baud)',
-    btnClearLog: '🗑️ Clear',
+    btnClearLog: 'Clear',
     autoscroll: 'Auto-scroll',
     consolePlaceholder: 'Connect to a COM port to inspect the serial data stream...',
     cmdPlaceholder: 'Send command (e.g. CMD:PING or CMD:DIAG_START)...',
@@ -234,14 +236,14 @@ export const translations = {
     presetCountBadge: (count) => `${count} items`,
     hexAttachedTag: '.HEX file attached',
     btnLoadPreset: 'Load',
-    btnLoadedPreset: 'Loaded ✓',
+    btnLoadedPreset: 'Loaded',
     emptyPresetsTitle: 'No saved presets yet.',
     emptyPresetsSub: 'Upload a .hex file and save it using the form on the left!',
 
     // Guide Card
-    guideTitle: '💡 How the Two-Stage System Works',
+    guideTitle: 'How the Two-Stage System Works',
     guidePoint1: '1. Diagnostics: The test harness automatically checks free SRAM, supply voltage, and I/O pins.',
-    guidePoint2: '2. Flash: Once all self-tests pass, pure user target firmware is flashed with zero modifications.',
+    guidePoint2: '2. Flash: Once all self-tests pass, pure user target firmware is flashed via STK500 protocol.',
     guidePoint3: 'Hardware Protection: If a shorted pin or abnormal voltage is detected, flashing is automatically blocked.'
   }
 };

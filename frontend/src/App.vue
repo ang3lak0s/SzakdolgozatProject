@@ -13,7 +13,6 @@
           <div class="brand-text-block">
             <div class="brand-title-row">
               <h1 class="brand-title">{{ t('appTitle') }}</h1>
-              <span class="version-tag">v2.0 • 2-Stage Diag</span>
             </div>
             <span class="brand-sub">{{ t('appSubtitle') }}</span>
           </div>
@@ -160,18 +159,6 @@ body {
   letter-spacing: -0.4px;
 }
 
-.version-tag {
-  font-size: 0.7rem;
-  font-weight: 700;
-  background: rgba(59, 130, 246, 0.15);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-  color: #60a5fa;
-  padding: 2px 8px;
-  border-radius: 12px;
-  text-transform: uppercase;
-  letter-spacing: 0.3px;
-}
-
 .brand-sub {
   font-size: 0.78rem;
   color: #94a3b8;
@@ -247,9 +234,6 @@ body {
     padding: 10px 16px;
   }
   .brand-sub {
-    display: none;
-  }
-  .version-tag {
     display: none;
   }
   .lang-name {
