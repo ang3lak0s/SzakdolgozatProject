@@ -1,0 +1,13 @@
+[run]
+source = devices, api
+omit =
+    */migrations/*
+    */tests/*
+    manage.py
+
+[report]
+show_missing = True
+
+[html]
+directory = htmlcov
+title = Firmware Diagnostic Backend - Test Coverage Report

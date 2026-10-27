@@ -37,13 +37,15 @@ export async function triggerHardwareReset(port) {
   if (!port || !port.setSignals) return;
 
   try {
-    // Assert DTR low
+    // Arduino Uno R3 (ATmega16U2) DTR auto-reset pulse:
+    // Guarantee sharp falling edge through the 100nF capacitor regardless of initial state
+    await port.setSignals({ dataTerminalReady: true, requestToSend: true });
+    await new Promise(r => setTimeout(r, 60));
     await port.setSignals({ dataTerminalReady: false, requestToSend: false });
     await new Promise(r => setTimeout(r, 120));
-    // Release DTR high to complete reset pulse
     await port.setSignals({ dataTerminalReady: true, requestToSend: true });
-    // Allow bootloader initialization window
-    await new Promise(r => setTimeout(r, 200));
+    // Allow Optiboot to complete initial clock/UART setup (16MHz crystal)
+    await new Promise(r => setTimeout(r, 120));
   } catch (err) {
     console.warn('Could not pulse DTR signals:', err);
   }
@@ -124,15 +126,24 @@ class Stk500Transport {
   }
 
   async expectResponse(timeoutMs = 800) {
-    const b1 = await this.readByte(timeoutMs);
-    if (b1 !== STK_INSYNC) {
-      throw new Error(`Expected STK_INSYNC (0x14), received 0x${b1.toString(16).toUpperCase()}`);
+    const deadline = Date.now() + timeoutMs;
+    while (Date.now() < deadline) {
+      const remaining = Math.max(10, deadline - Date.now());
+      let b1;
+      try {
+        b1 = await this.readByte(remaining);
+      } catch (e) {
+        break;
+      }
+      if (b1 === STK_INSYNC) {
+        const nextRemaining = Math.max(10, deadline - Date.now());
+        const b2 = await this.readByte(nextRemaining);
+        if (b2 === STK_OK) {
+          return true;
+        }
+      }
     }
-    const b2 = await this.readByte(timeoutMs);
-    if (b2 !== STK_OK) {
-      throw new Error(`Expected STK_OK (0x10), received 0x${b2.toString(16).toUpperCase()}`);
-    }
-    return true;
+    throw new Error(`Timeout waiting for STK_INSYNC (0x14) / STK_OK (0x10) from microcontroller`);
   }
 
   flushRx() {
@@ -172,17 +183,17 @@ export async function flashFirmwareSTK500(port, hexContent, options = {}) {
 
     let synced = false;
     let syncAttempts = 0;
-    const maxSyncAttempts = 8;
+    const maxSyncAttempts = 12;
 
     while (!synced && syncAttempts < maxSyncAttempts) {
       syncAttempts++;
       transport.flushRx();
       try {
         await transport.writeBytes([CMD_STK_GET_SYNC, SYNC_CRC_EOP]);
-        await transport.expectResponse(400);
+        await transport.expectResponse(350);
         synced = true;
       } catch (err) {
-        await new Promise(r => setTimeout(r, 60));
+        await new Promise(r => setTimeout(r, 50));
       }
     }
 

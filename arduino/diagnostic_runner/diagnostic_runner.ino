@@ -35,10 +35,10 @@ extern void *__brkval;
  * ============================================================================ */
 int getFreeRam() {
     int freeMemory;
-    if ((int)__brkval == 0) {
-        freeMemory = ((int)&freeMemory) - ((int)&__heap_start);
+    if (__brkval == 0) {
+        freeMemory = (int)((char*)&freeMemory - (char*)&__heap_start);
     } else {
-        freeMemory = ((int)&freeMemory) - ((int)__brkval);
+        freeMemory = (int)((char*)&freeMemory - (char*)__brkval);
     }
     return freeMemory;
 }
@@ -49,7 +49,6 @@ int getFreeRam() {
 long readVccMillivolts() {
     #if defined(__AVR_ATmega328P__) || defined(__AVR_ATmega168__)
         // Read 1.1V reference against AVcc
-        // set the reference to Vcc and the measurement to the internal 1.1V reference
         ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
         delay(3); // Wait for Vref to settle
         ADCSRA |= _BV(ADSC); // Start conversion
@@ -61,6 +60,11 @@ long readVccMillivolts() {
 
         // Calculate Vcc (in mV); 1125300 = 1.1*1023*1000
         long vcc = 1125300L / result;
+        
+        // Restore standard reference to avoid corrupting subsequent analogRead()
+        ADMUX = _BV(REFS0);
+        delayMicroseconds(500);
+
         return vcc;
     #else
         return 5000; // Default fallback for other MCUs
@@ -70,7 +74,7 @@ long readVccMillivolts() {
 /* ============================================================================
  * Diagnostic Suite Execution
  * ============================================================================ */
-void runFullDiagnostics() {
+void runFullDiagnostics(bool simulateFault = false) {
     Serial.println(F("[DIAG:START]"));
     delay(100);
 
@@ -80,29 +84,38 @@ void runFullDiagnostics() {
     // 1. RAM Diagnostics
     totalChecks++;
     int freeRam = getFreeRam();
-    Serial.print(F("[DIAG:RAM:FREE="));
-    Serial.print(freeRam);
-    Serial.print(F(";TOTAL="));
-    Serial.print(TOTAL_RAM_BYTES);
-    if (freeRam > 256) {
-        Serial.println(F(";STATUS=OK]"));
-    } else {
-        Serial.println(F(";STATUS=WARN;MSG=LOW_MEMORY]"));
+    if (simulateFault) {
+        Serial.println(F("[DIAG:RAM:FREE=120;TOTAL=2048;STATUS=WARN;MSG=LOW_MEMORY]"));
         failedChecks++;
+    } else {
+        Serial.print(F("[DIAG:RAM:FREE="));
+        Serial.print(freeRam);
+        Serial.print(F(";TOTAL="));
+        Serial.print(TOTAL_RAM_BYTES);
+        if (freeRam > 256) {
+            Serial.println(F(";STATUS=OK]"));
+        } else {
+            Serial.println(F(";STATUS=WARN;MSG=LOW_MEMORY]"));
+            failedChecks++;
+        }
     }
     delay(80);
 
     // 2. Vcc Voltage Check
     totalChecks++;
-    long vccMv = readVccMillivolts();
-    float vccVolts = vccMv / 1000.0;
-    Serial.print(F("[DIAG:VCC:VOLTS="));
-    Serial.print(vccVolts, 2);
-    if (vccMv >= 4300 && vccMv <= 5500) {
-        Serial.println(F(";STATUS=OK]"));
+    if (simulateFault) {
+        Serial.println(F("[DIAG:VCC:VOLTS=3.12;STATUS=FAIL;MSG=UNDERVOLTAGE]"));
+        failedChecks++;
     } else {
-        Serial.println(F(";STATUS=WARN;MSG=VOLTAGE_OUT_OF_RANGE]"));
-        // We warn but don't strictly fail on slight supply droop
+        long vccMv = readVccMillivolts();
+        float vccVolts = vccMv / 1000.0;
+        Serial.print(F("[DIAG:VCC:VOLTS="));
+        Serial.print(vccVolts, 2);
+        if (vccMv >= 4300 && vccMv <= 5500) {
+            Serial.println(F(";STATUS=OK]"));
+        } else {
+            Serial.println(F(";STATUS=WARN;MSG=VOLTAGE_OUT_OF_RANGE]"));
+        }
     }
     delay(80);
 
@@ -110,21 +123,27 @@ void runFullDiagnostics() {
     for (uint8_t pin = START_DIGITAL_PIN; pin <= END_DIGITAL_PIN; pin++) {
         totalChecks++;
 
-        // Test Input with Internal Pull-up
-        pinMode(pin, INPUT_PULLUP);
-        delayMicroseconds(50);
-        int pullupRead = digitalRead(pin);
-
-        // Reset pin to safe high-impedance state
-        pinMode(pin, INPUT);
-
-        Serial.print(F("[DIAG:GPIO:PIN="));
-        Serial.print(pin);
-        if (pullupRead == HIGH) {
-            Serial.println(F(";STATE=OK]"));
+        if (simulateFault && pin == 4) {
+            Serial.println(F("[DIAG:GPIO:PIN=4;STATE=SHORTED_GND;STATUS=FAIL]"));
+            failedChecks++;
         } else {
-            // Pin is pulled LOW externally or shorted to GND
-            Serial.println(F(";STATE=PULLED_LOW]"));
+            // Test Input with Internal Pull-up
+            pinMode(pin, INPUT_PULLUP);
+            delayMicroseconds(50);
+            int pullupRead = digitalRead(pin);
+
+            // Reset pin to safe high-impedance state
+            pinMode(pin, INPUT);
+
+            Serial.print(F("[DIAG:GPIO:PIN="));
+            Serial.print(pin);
+            if (pullupRead == HIGH) {
+                Serial.println(F(";STATE=OK]"));
+            } else {
+                // Pin is pulled LOW externally or shorted to GND
+                Serial.println(F(";STATE=PULLED_LOW]"));
+                failedChecks++;
+            }
         }
         delay(40);
     }
@@ -144,6 +163,9 @@ void runFullDiagnostics() {
     // 5. I2C Bus Scan
     totalChecks++;
     Wire.begin();
+    #if defined(WIRE_HAS_TIMEOUT)
+    Wire.setWireTimeout(25000, true); // 25ms timeout with reset on bus lockup
+    #endif
     int i2cDevicesFound = 0;
     for (uint8_t address = 1; address < 127; address++) {
         Wire.beginTransmission(address);
@@ -188,16 +210,21 @@ void runFullDiagnostics() {
         Serial.print(totalChecks);
         Serial.print(F(";FAILED="));
         Serial.print(failedChecks);
+        if (simulateFault) {
+            Serial.print(F(";ERROR=PIN_4_SHORTED_AND_LOW_VCC"));
+        }
         Serial.println(F("]"));
     }
+    Serial.flush();
 }
 
 void setup() {
     Serial.begin(BAUD_RATE);
-    while (!Serial) { ; } // Wait for serial port to connect
+    delay(100);
 
     Serial.println(F("[SYSTEM:READY] Arduino Diagnostic Runner V2.0 Initialized"));
     Serial.println(F("[HINT] Send 'CMD:DIAG_START' to run diagnostic suite"));
+    Serial.flush();
 }
 
 void loop() {
@@ -205,10 +232,13 @@ void loop() {
         String cmd = Serial.readStringUntil('\n');
         cmd.trim();
 
-        if (cmd == "CMD:DIAG_START" || cmd == "DIAG") {
-            runFullDiagnostics();
-        } else if (cmd == "CMD:PING") {
+        if (cmd.indexOf("CMD:DIAG_START") >= 0 || cmd == "DIAG") {
+            runFullDiagnostics(false);
+        } else if (cmd.indexOf("CMD:SIM_FAULT") >= 0) {
+            runFullDiagnostics(true);
+        } else if (cmd.indexOf("CMD:PING") >= 0) {
             Serial.println(F("[PONG] Diagnostic Runner Active"));
+            Serial.flush();
         }
     }
 }

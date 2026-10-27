@@ -19,11 +19,14 @@ def upload_preset(request):
     if 'config_json' in data:
         if isinstance(data['config_json'], str):
             try:
-                data['config_json'] = json.loads(data['config_json']) if data['config_json'].strip() else {}
+                parsed = json.loads(data['config_json']) if data['config_json'].strip() else {}
+                data['config_json'] = json.dumps(parsed)
             except Exception:
-                data['config_json'] = {}
+                data['config_json'] = '{}'
+        elif isinstance(data['config_json'], dict):
+            data['config_json'] = json.dumps(data['config_json'])
     else:
-        data['config_json'] = {}
+        data['config_json'] = '{}'
 
     serializer = PresetSerializer(data=data)
     if serializer.is_valid():

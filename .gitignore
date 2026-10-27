@@ -1,0 +1,15 @@
+# Python & Virtualenv
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+.coverage
+htmlcov/
+
+# Node
+node_modules/
+frontend/dist/
+
+# Build artifacts & Toolchain clones
+arduino/build/
+tools/ArduinoCore-avr/

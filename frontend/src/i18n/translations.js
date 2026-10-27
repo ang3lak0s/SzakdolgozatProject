@@ -37,9 +37,10 @@ export const translations = {
     stage1Title: '1. Fázis: Hardver Diagnosztikai HUD',
     badgeIdle: 'Készenlétben',
     badgeRunning: 'Diagnosztika fut...',
-    badgeSuccess: 'MINDEN TESZT SIKERES',
-    badgeDanger: 'HIBA DETEKTÁLVA',
     btnStartDiag: 'Diagnosztika Indítása',
+    btnFlashDiagRunner: 'Diagnosztikai Futtató Telepítése',
+    btnFlashDiagRunnerTitle: 'Stage 1 teszt firmware feltöltése a mikrokontrollerre STK500 protokollal',
+    msgDiagRunnerInstalled: 'Diagnosztikai futtató sikeresen telepítve az Arduinóra! Készen áll a hardvertesztre.',
     btnSimFault: 'Hiba-szimuláció',
     btnSimFaultTitle: 'Szimulál egy sérült pint / alacsony feszültséget a biztonsági reteszelés teszteléséhez',
 
@@ -164,6 +165,9 @@ export const translations = {
     badgeSuccess: 'ALL CHECKS PASSED',
     badgeDanger: 'FAULT DETECTED',
     btnStartDiag: 'Run Diagnostics',
+    btnFlashDiagRunner: 'Flash Diagnostic Runner',
+    btnFlashDiagRunnerTitle: 'Upload Stage 1 self-test firmware to microcontroller via STK500 bootloader',
+    msgDiagRunnerInstalled: 'Diagnostic runner successfully flashed to Arduino! Ready for hardware verification.',
     btnSimFault: 'Fault Injection',
     btnSimFaultTitle: 'Simulates a faulty pin / undervoltage condition to test safety interlock',
 

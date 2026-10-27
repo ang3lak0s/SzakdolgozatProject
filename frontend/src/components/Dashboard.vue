@@ -62,8 +62,8 @@
 
             <!-- Diag Trigger Buttons -->
             <div class="diag-action-bar">
-              <button @click="startDiagnostics(false)" :disabled="!isConnected || diagState.status === 'RUNNING' || isFlashing" class="btn-sub btn-diag">
-                {{ t('btnStartDiag') }}
+              <button @click="flashDiagnosticRunner(true)" :disabled="!isConnected || diagState.status === 'RUNNING' || isFlashing" class="btn-sub btn-provision" :title="t('btnFlashDiagRunnerTitle')">
+                {{ t('btnFlashDiagRunner') }}
               </button>
               <button @click="startDiagnostics(true)" :disabled="!isConnected || diagState.status === 'RUNNING' || isFlashing" class="btn-sub btn-fault" :title="t('btnSimFaultTitle')">
                 {{ t('btnSimFault') }}
@@ -182,6 +182,7 @@
             <h3>{{ t('stage2Title') }}</h3>
             <span v-if="isFlashing" class="badge badge-running pulse">{{ t('badgeFlashing') }}</span>
             <span v-else-if="isFlashingDone" class="badge badge-success">{{ t('badgeFirmwareRunning') }}</span>
+            <span v-else-if="isFlashingBlocked" class="badge badge-danger">{{ t('badgeDanger') }}</span>
           </div>
 
           <div class="flash-form-grid">
@@ -245,7 +246,8 @@
               type="button"
               class="btn-master btn-primary-two-stage"
               @click="runTwoStageVerificationAndFlash"
-              :disabled="!isConnected || isFlashing || diagState.status === 'RUNNING' || (!firmwareFile && !loadedFirmwareUrl)"
+              :disabled="!isConnected || isFlashing || diagState.status === 'RUNNING' || (!firmwareFile && !loadedFirmwareUrl) || isFlashingBlocked"
+              :title="isFlashingBlocked ? t('msgDiagHaltError') : ''"
             >
               <span>{{ t('btnTwoStageFlash') }}</span>
             </button>
@@ -254,7 +256,8 @@
               type="button"
               class="btn-master btn-direct-flash"
               @click="flashTargetFirmwareDirectly"
-              :disabled="!isConnected || isFlashing || diagState.status === 'RUNNING' || (!firmwareFile && !loadedFirmwareUrl)"
+              :disabled="!isConnected || isFlashing || diagState.status === 'RUNNING' || (!firmwareFile && !loadedFirmwareUrl) || isFlashingBlocked"
+              :title="isFlashingBlocked ? t('msgDiagHaltError') : ''"
             >
               <span>{{ t('btnDirectFlash') }}</span>
             </button>
@@ -269,8 +272,8 @@
             </button>
           </div>
 
-          <p v-if="flashMessage" class="feedback-msg" :class="{ 'msg-error': isError, 'msg-success': !isError }">
-            {{ flashMessage }}
+          <p v-if="currentFlashMessage" class="feedback-msg" :class="{ 'msg-error': isError, 'msg-success': !isError }">
+            {{ currentFlashMessage }}
           </p>
         </div>
 
@@ -393,8 +396,9 @@
 
 <script>
 import axios from 'axios';
-import { t } from '../i18n';
+import { i18nState, t } from '../i18n';
 import { flashFirmwareSTK500 } from '../utils/stk500';
+import { DIAGNOSTIC_RUNNER_HEX } from '../utils/diagnosticRunnerHex';
 
 export default {
   data() {
@@ -406,6 +410,8 @@ export default {
       loadedFirmwareUrl: null,
       loadedPresetId: null,
       isUploading: false,
+      flashMessageKey: null,
+      flashMessageParams: [],
       flashMessage: '',
       isError: false,
       presets: [],
@@ -448,6 +454,18 @@ export default {
   },
 
   computed: {
+    currentLang() {
+      return i18nState.currentLang;
+    },
+    currentFlashMessage() {
+      if (this.flashMessageKey) {
+        return t(this.flashMessageKey, ...(this.flashMessageParams || []));
+      }
+      return this.flashMessage;
+    },
+    isFlashingBlocked() {
+      return this.diagState.result === 'FAIL';
+    },
     getRamClass() {
       if (!this.diagState.ram.free) return '';
       if (this.diagState.ram.free > 500) return 'text-emerald';
@@ -463,12 +481,32 @@ export default {
     }
   },
 
+  watch: {
+    currentLang() {
+      if (this.flashMessageKey) {
+        this.flashMessage = t(this.flashMessageKey, ...(this.flashMessageParams || []));
+      }
+    }
+  },
+
   mounted() {
     this.loadPresets();
   },
 
   methods: {
     t,
+    setFlashMessage(key, isError = false, params = []) {
+      this.flashMessageKey = key;
+      this.flashMessageParams = params;
+      this.flashMessage = t(key, ...params);
+      this.isError = isError;
+    },
+    clearFlashMessage() {
+      this.flashMessageKey = null;
+      this.flashMessageParams = [];
+      this.flashMessage = '';
+      this.isError = false;
+    },
     // =========================================================================
     // Web Serial Connection
     // =========================================================================
@@ -487,6 +525,7 @@ export default {
       }
 
       this.resetDiagnosticState();
+      this.clearFlashMessage();
       this.diagState.status = 'IDLE';
 
       try {
@@ -510,6 +549,7 @@ export default {
         this.diagTimeout = null;
       }
       this.resetDiagnosticState();
+      this.clearFlashMessage();
       this.diagState.status = 'IDLE';
       this.digitalPins.forEach(p => (this.diagState.gpio[p] = null));
 
@@ -644,6 +684,7 @@ export default {
       }
 
       this.resetDiagnosticState();
+      this.clearFlashMessage();
       this.diagState.status = 'RUNNING';
       this.digitalPins.forEach(p => (this.diagState.gpio[p] = 'TESTING'));
 
@@ -653,8 +694,11 @@ export default {
       this.diagTimeout = setTimeout(() => {
         if (this.diagState.status === 'RUNNING') {
           this.diagState.status = 'IDLE';
+          this.diagState.result = 'FAIL';
           this.digitalPins.forEach(p => (this.diagState.gpio[p] = null));
-          this.writeToLog('>> [TIMEOUT] Nem érkezett válasz a mikrokontrollertől. Próbáld újra!\n');
+          this.setFlashMessage('msgDiagHaltError', true);
+          this.writeToLog('>> [TIMEOUT] Nem érkezett válasz a mikrokontrollertől.\n');
+          this.writeToLog('>> [TIPP / HINT] Ha fizikai Arduinót csatlakoztattál, először kattints a "⚡ Diagnosztikai Futtató Telepítése" gombra a felkészítéshez!\n');
         }
       }, 5000);
 
@@ -662,7 +706,70 @@ export default {
       await this.sendSerialText(cmd);
     },
 
+    async flashDiagnosticRunner(autoRunDiag = true) {
+      if (!this.isConnected || !this.port) {
+        this.setFlashMessage('msgPortError', true);
+        return;
+      }
+      if (this.isFlashing) return;
+
+      this.isFlashing = true;
+      this.isFlashingDone = false;
+      this.flashProgress = 0;
+      this.clearFlashMessage();
+      this.setFlashMessage('badgeFlashing', false);
+
+      this.writeToLog('\n========================================================\n');
+      this.writeToLog('>> [STAGE 1 PROVISIONING] Flashing Diagnostic Runner to microcontroller via STK500...\n');
+
+      try {
+        await this.pauseSerialReader();
+
+        await flashFirmwareSTK500(this.port, DIAGNOSTIC_RUNNER_HEX, {
+          onProgress: (p) => {
+            this.flashProgress = p.percent;
+            if (p.phase === 'PROGRAMMING') {
+              this.flashMessage = `${t('badgeFlashing')} (${p.current}/${p.total} pages - ${p.percent}%)`;
+            }
+          },
+          onLog: (msg) => {
+            this.writeToLog(msg + '\n');
+          }
+        });
+
+        this.setFlashMessage('msgDiagRunnerInstalled', false);
+        this.writeToLog('>> [STAGE 1 READY] Diagnostic Runner active on microcontroller!\n');
+      } catch (err) {
+        console.error('Diagnostic runner flash error:', err);
+        this.flashMessageKey = null;
+        this.flashMessageParams = [];
+        this.flashMessage = t('msgFlashError') + err.message;
+        this.isError = true;
+        this.writeToLog(`>> [STAGE 1 FLASH ERROR] ${err.message}\n`);
+      } finally {
+        this.isFlashing = false;
+        this.resumeSerialReader();
+      }
+
+      if (autoRunDiag && !this.isError) {
+        await new Promise(r => setTimeout(r, 450));
+        this.writeToLog('>> [AUTO-DIAGNOSTICS] Launching hardware diagnostic suite...\n');
+        await this.startDiagnostics(false);
+      }
+    },
+
     parseDiagnosticLine(line) {
+      if (line.includes('[SYSTEM:READY]')) {
+        this.writeToLog('>> [HARDWARE READY] Arduino Uno R3 felkészítve és készen áll a diagnosztikára!\n');
+        if (this.diagState.status === 'IDLE' && !this.diagState.result) {
+          this.setFlashMessage('msgDiagRunnerInstalled', false);
+        }
+        return;
+      }
+      if (line.includes('[PONG]')) {
+        this.writeToLog('>> [HARDWARE PONG] Mikrokontroller válaszolt a PING-re.\n');
+        return;
+      }
       if (!line.startsWith('[DIAG:')) return;
 
       const content = line.substring(6, line.length - 1);
@@ -711,6 +818,13 @@ export default {
 
         if (this.diagState.result === 'PASS') {
           this.currentStep = 3;
+          if (this.flashMessageKey === 'msgDiagHaltError') {
+            this.clearFlashMessage();
+          }
+        } else {
+          this.currentStep = 2;
+          this.setFlashMessage('msgDiagHaltError', true);
+          this.writeToLog('>> [SAFETY INTERLOCK] Flashing blocked due to hardware fault!\n');
         }
       }
     },
@@ -748,13 +862,16 @@ export default {
     // =========================================================================
     async runTwoStageVerificationAndFlash() {
       if (!this.isConnected || !this.port) {
-        this.flashMessage = t('msgPortError');
-        this.isError = true;
+        this.setFlashMessage('msgPortError', true);
         return;
       }
       if (!this.firmwareFile && !this.loadedFirmwareUrl) {
-        this.flashMessage = t('msgSelectHexError');
-        this.isError = true;
+        this.setFlashMessage('msgSelectHexError', true);
+        return;
+      }
+      if (this.isFlashingBlocked) {
+        this.setFlashMessage('msgDiagHaltError', true);
+        this.writeToLog('>> [SAFETY INTERLOCK] Flashing blocked due to hardware fault!\n');
         return;
       }
 
@@ -765,21 +882,38 @@ export default {
       await this.startDiagnostics(false);
 
       const startTime = Date.now();
-      const waitForDiag = () =>
+      const waitForDiag = (maxMs = 5000) =>
         new Promise(resolve => {
           const checkInterval = setInterval(() => {
-            if (this.diagState.status === 'COMPLETED' || Date.now() - startTime > 8000) {
+            if (this.diagState.status === 'COMPLETED' || Date.now() - startTime > maxMs) {
               clearInterval(checkInterval);
               resolve();
             }
           }, 150);
         });
 
-      await waitForDiag();
+      await waitForDiag(5000);
+
+      // Ha nem érkezett válasz (pl. új kártya vagy már korábbi target fut rajta): automatikus Stage 1 telepítés
+      if (this.diagState.status !== 'COMPLETED' || this.diagState.result !== 'PASS') {
+        if (this.diagState.totalChecks === 0) {
+          this.writeToLog('>> [AUTO-PROVISION] Diagnosztikai futtató nincs jelen. Automatikus telepítés STK500-zal...\n');
+          await this.flashDiagnosticRunner(true);
+
+          const retryStart = Date.now();
+          await new Promise(resolve => {
+            const checkInterval = setInterval(() => {
+              if (this.diagState.status === 'COMPLETED' || Date.now() - retryStart > 7000) {
+                clearInterval(checkInterval);
+                resolve();
+              }
+            }, 150);
+          });
+        }
+      }
 
       if (this.diagState.result !== 'PASS') {
-        this.flashMessage = t('msgDiagHaltError');
-        this.isError = true;
+        this.setFlashMessage('msgDiagHaltError', true);
         this.writeToLog('>> [SAFETY INTERLOCK] Flashing blocked due to hardware fault!\n');
         return;
       }
@@ -791,21 +925,23 @@ export default {
 
     async flashTargetFirmwareDirectly() {
       if (!this.isConnected || !this.port) {
-        this.flashMessage = t('msgPortError');
-        this.isError = true;
+        this.setFlashMessage('msgPortError', true);
         return;
       }
       if (!this.firmwareFile && !this.loadedFirmwareUrl) {
-        this.flashMessage = t('msgSelectHexError');
-        this.isError = true;
+        this.setFlashMessage('msgSelectHexError', true);
+        return;
+      }
+      if (this.isFlashingBlocked) {
+        this.setFlashMessage('msgDiagHaltError', true);
+        this.writeToLog('>> [SAFETY INTERLOCK] Flashing blocked due to hardware fault!\n');
         return;
       }
 
       this.isFlashing = true;
       this.isFlashingDone = false;
       this.flashProgress = 0;
-      this.flashMessage = t('badgeFlashing');
-      this.isError = false;
+      this.setFlashMessage('badgeFlashing', false);
 
       try {
         let hexText;
@@ -833,10 +969,12 @@ export default {
         });
 
         this.isFlashingDone = true;
-        this.flashMessage = t('msgFlashSuccess');
+        this.setFlashMessage('msgFlashSuccess', false);
         this.writeToLog('>> [FLASH SUCCESS] Target firmware active and running.\n');
       } catch (err) {
         console.error('Flashing error:', err);
+        this.flashMessageKey = null;
+        this.flashMessageParams = [];
         this.flashMessage = t('msgFlashError') + err.message;
         this.isError = true;
         this.writeToLog(`>> [FLASH ERROR] ${err.message}\n`);
@@ -873,24 +1011,21 @@ export default {
       this.loadedFirmwareUrl = preset.firmware_file;
       this.loadedPresetId = preset.id;
       this.firmwareFile = null;
-      this.flashMessage = t('msgPresetLoaded', preset.name);
-      this.isError = false;
+      this.setFlashMessage('msgPresetLoaded', false, [preset.name]);
     },
 
     async savePreset() {
       if (!this.firmwareFile) {
-        this.flashMessage = t('msgFileRequired');
-        this.isError = true;
+        this.setFlashMessage('msgFileRequired', true);
         return;
       }
       if (!this.presetName) {
-        this.flashMessage = t('msgNameRequired');
-        this.isError = true;
+        this.setFlashMessage('msgNameRequired', true);
         return;
       }
 
       this.isUploading = true;
-      this.flashMessage = '';
+      this.clearFlashMessage();
 
       const formData = new FormData();
       formData.append('name', this.presetName);
@@ -905,12 +1040,10 @@ export default {
             Authorization: `Token ${token}`
           }
         });
-        this.flashMessage = t('msgPresetSaved');
-        this.isError = false;
+        this.setFlashMessage('msgPresetSaved', false);
         this.loadPresets();
       } catch (err) {
-        this.flashMessage = t('msgPresetSaveError');
-        this.isError = true;
+        this.setFlashMessage('msgPresetSaveError', true);
       } finally {
         this.isUploading = false;
       }
@@ -1183,6 +1316,8 @@ h3 {
 }
 .btn-diag { background: #0284c7; color: white; }
 .btn-diag:hover:not(:disabled) { background: #0369a1; }
+.btn-provision { background: #059669; color: white; }
+.btn-provision:hover:not(:disabled) { background: #047857; }
 .btn-fault { background: #475569; color: #f1f5f9; }
 .btn-fault:hover:not(:disabled) { background: #334155; }
 .btn-sub:disabled { opacity: 0.5; cursor: not-allowed; }
