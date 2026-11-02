@@ -18,8 +18,34 @@
           </div>
         </div>
 
-        <!-- Sleek Language Switcher -->
+        <!-- Theme & Language Switcher -->
         <div class="lang-switcher-container">
+          <!-- Theme Toggle Pill -->
+          <button
+            type="button"
+            class="theme-toggle-btn"
+            @click="toggleTheme"
+            :title="t('themeToggleTitle')"
+          >
+            <!-- Sun Icon (when in Light Mode) -->
+            <svg v-if="theme === 'light'" class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <!-- Moon Icon (when in Dark Mode) -->
+            <svg v-else class="theme-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <span class="theme-label">{{ theme === 'light' ? t('themeLight') : t('themeDark') }}</span>
+          </button>
+
           <div class="lang-pill">
             <button
               type="button"
@@ -53,14 +79,33 @@
 </template>
 
 <script>
+import { ref, onMounted } from 'vue';
 import { i18nState, setLanguage, t } from './i18n';
 
 export default {
   setup() {
+    const theme = ref(localStorage.getItem('app-theme') || 'dark');
+
+    const applyTheme = (val) => {
+      document.documentElement.setAttribute('data-theme', val);
+      localStorage.setItem('app-theme', val);
+    };
+
+    const toggleTheme = () => {
+      theme.value = theme.value === 'dark' ? 'light' : 'dark';
+      applyTheme(theme.value);
+    };
+
+    onMounted(() => {
+      applyTheme(theme.value);
+    });
+
     return {
       i18nState,
       setLanguage,
-      t
+      t,
+      theme,
+      toggleTheme
     };
   }
 };
@@ -75,8 +120,8 @@ html, body {
 }
 
 body {
-  background: #0b0f19;
-  color: #f8fafc;
+  background: var(--bg-page);
+  color: var(--text-primary);
   font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
@@ -93,14 +138,15 @@ body {
    ========================================================================= */
 .app-topbar {
   width: 100%;
-  background: rgba(15, 23, 42, 0.85);
+  background: var(--bg-topbar);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid var(--border-card);
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  box-shadow: var(--shadow-topbar);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
 }
 
 .topbar-container {
@@ -153,38 +199,71 @@ body {
 
 .brand-title {
   margin: 0;
+  padding: 0;
   font-size: 1.25rem;
   font-weight: 800;
-  color: #f8fafc;
+  color: var(--text-primary);
   letter-spacing: -0.4px;
 }
 
 .brand-sub {
   font-size: 0.78rem;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
-/* Language Switcher Pill */
+/* Theme & Language Switcher */
 .lang-switcher-container {
   display: flex;
   align-items: center;
+  gap: 10px;
+}
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-control);
+  color: var(--text-secondary);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: var(--shadow-inset);
+}
+
+.theme-toggle-btn:hover {
+  border-color: #3b82f6;
+  color: var(--text-primary);
+}
+
+.theme-icon {
+  width: 16px;
+  height: 16px;
+  color: #f59e0b;
+}
+
+:root:not([data-theme="light"]) .theme-icon {
+  color: #38bdf8;
 }
 
 .lang-pill {
   display: flex;
   align-items: center;
-  background: #0f172a;
-  border: 1px solid #334155;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-control);
   border-radius: 10px;
   padding: 3px;
   gap: 2px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-inset);
 }
 
 .lang-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: var(--text-muted);
   padding: 6px 14px;
   border-radius: 7px;
   cursor: pointer;
@@ -207,7 +286,7 @@ body {
 }
 
 .lang-btn:hover {
-  color: #e2e8f0;
+  color: var(--text-primary);
 }
 
 .lang-btn.active {
@@ -236,7 +315,8 @@ body {
   .brand-sub {
     display: none;
   }
-  .lang-name {
+  .lang-name,
+  .theme-label {
     display: none;
   }
   .lang-btn {

@@ -4,6 +4,9 @@ export const translations = {
     appTitle: 'Arduino Vezérlőpanel',
     appSubtitle: 'Kétlépéses hardver ellenőrző és firmware égető rendszer',
     langSelector: 'Nyelv',
+    themeLight: 'Világos',
+    themeDark: 'Sötét',
+    themeToggleTitle: 'Téma váltása (Világos / Sötét mód)',
 
     // Auth - Login
     loginTitle: 'Bejelentkezés',
@@ -129,6 +132,9 @@ export const translations = {
     appTitle: 'Arduino Control Panel',
     appSubtitle: 'Two-stage hardware verification and firmware flashing system',
     langSelector: 'Language',
+    themeLight: 'Light',
+    themeDark: 'Dark',
+    themeToggleTitle: 'Toggle theme (Light / Dark mode)',
 
     // Auth - Login
     loginTitle: 'Sign In',

@@ -1099,12 +1099,13 @@ export default {
 
 /* Glassmorphism Cards */
 .glass-card {
-  background: rgba(17, 24, 39, 0.85);
+  background: var(--bg-card);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-card);
   border-radius: 14px;
   padding: 22px;
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+  box-shadow: var(--shadow-card);
+  transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 /* =========================================================================
@@ -1128,14 +1129,14 @@ h2 {
   margin: 0;
   font-size: 1.45rem;
   font-weight: 700;
-  color: #f3f4f6;
+  color: var(--text-heading);
   letter-spacing: -0.3px;
 }
 
 .subtitle {
   margin: 4px 0 0 0;
   font-size: 0.88rem;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .port-connection-wrapper {
@@ -1147,7 +1148,7 @@ h2 {
 
 .linux-hint {
   font-size: 0.72rem;
-  color: #64748b;
+  color: var(--text-dim);
   line-height: 1.2;
 }
 
@@ -1155,17 +1156,17 @@ h2 {
   display: flex;
   align-items: center;
   gap: 10px;
-  background: #1e293b;
+  background: var(--bg-surface-elevated);
   padding: 8px 14px;
   border-radius: 10px;
-  border: 1px solid #334155;
+  border: 1px solid var(--border-control);
 }
 
 .status-indicator {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: #64748b;
+  background: var(--text-dim);
   transition: all 0.3s ease;
 }
 .status-indicator.online {
@@ -1179,7 +1180,7 @@ h2 {
 .status-text {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-secondary);
 }
 
 .btn-port {
@@ -1208,23 +1209,23 @@ h2 {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #0f172a;
+  background: var(--bg-surface);
   padding: 12px 20px;
   border-radius: 10px;
-  border: 1px solid #1e293b;
+  border: 1px solid var(--border-subtle);
 }
 
 .step-item {
   display: flex;
   align-items: center;
   gap: 10px;
-  opacity: 0.5;
+  opacity: 0.55;
   transition: all 0.3s ease;
 }
 .step-item.active { opacity: 1; }
 .step-item.current .step-circle {
   background: #3b82f6;
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.6);
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.5);
 }
 .step-item.done .step-circle {
   background: #10b981;
@@ -1238,7 +1239,7 @@ h2 {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: #334155;
+  background: #475569;
   color: white;
   display: flex;
   align-items: center;
@@ -1250,13 +1251,13 @@ h2 {
 .step-label {
   font-size: 0.82rem;
   font-weight: 600;
-  color: #e2e8f0;
+  color: var(--text-secondary);
 }
 
 .step-divider {
   flex-grow: 1;
   height: 2px;
-  background: #334155;
+  background: var(--border-control);
   margin: 0 15px;
   transition: all 0.3s ease;
 }
@@ -1284,7 +1285,7 @@ h3 {
   margin: 0;
   font-size: 1.15rem;
   font-weight: 700;
-  color: #f1f5f9;
+  color: var(--text-heading);
 }
 
 .badge {
@@ -1295,10 +1296,10 @@ h3 {
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
-.badge-idle { background: #334155; color: #94a3b8; }
-.badge-running { background: rgba(59, 130, 246, 0.2); color: #60a5fa; border: 1px solid #3b82f6; }
-.badge-success { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; }
-.badge-danger { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+.badge-idle { background: var(--bg-surface-elevated); color: var(--text-muted); border: 1px solid var(--border-subtle); }
+.badge-running { background: var(--badge-running-bg); color: var(--badge-running-text); border: 1px solid #3b82f6; }
+.badge-success { background: var(--badge-success-bg); color: var(--badge-success-text); border: 1px solid #10b981; }
+.badge-danger { background: var(--badge-danger-bg); color: var(--badge-danger-text); border: 1px solid #ef4444; }
 
 .diag-action-bar {
   display: flex;
@@ -1318,8 +1319,8 @@ h3 {
 .btn-diag:hover:not(:disabled) { background: #0369a1; }
 .btn-provision { background: #059669; color: white; }
 .btn-provision:hover:not(:disabled) { background: #047857; }
-.btn-fault { background: #475569; color: #f1f5f9; }
-.btn-fault:hover:not(:disabled) { background: #334155; }
+.btn-fault { background: var(--btn-secondary-bg); color: var(--btn-secondary-text); border: 1px solid var(--border-subtle); }
+.btn-fault:hover:not(:disabled) { background: var(--btn-secondary-hover); }
 .btn-sub:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* Telemetry Gauges */
@@ -1331,8 +1332,8 @@ h3 {
 }
 
 .telemetry-box {
-  background: #0f172a;
-  border: 1px solid #1e293b;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: 10px;
   padding: 12px 14px;
   display: flex;
@@ -1343,33 +1344,33 @@ h3 {
 .telemetry-label {
   font-size: 0.75rem;
   font-weight: 600;
-  color: #94a3b8;
+  color: var(--text-muted);
   margin-bottom: 4px;
 }
 
 .telemetry-val {
   font-size: 1.18rem;
   font-weight: 800;
-  color: #f8fafc;
+  color: var(--text-primary);
   font-family: monospace;
 }
 
 .telemetry-sub {
   font-size: 0.72rem;
-  color: #64748b;
+  color: var(--text-dim);
   margin-top: 4px;
 }
 
-.text-emerald { color: #34d399; }
-.text-amber { color: #fbbf24; }
-.text-rose { color: #f87171; }
-.text-cyan { color: #38bdf8; }
-.text-violet { color: #a78bfa; }
+.text-emerald { color: var(--color-emerald); }
+.text-amber { color: var(--color-amber); }
+.text-rose { color: var(--color-rose); }
+.text-cyan { color: var(--color-cyan); }
+.text-violet { color: var(--color-violet); }
 
 .progress-bar-bg {
   width: 100%;
   height: 4px;
-  background: #1e293b;
+  background: var(--bg-surface-elevated);
   border-radius: 2px;
   margin-top: 6px;
   overflow: hidden;
@@ -1382,8 +1383,8 @@ h3 {
 
 /* Pin Matrix */
 .pin-matrix-container {
-  background: #0f172a;
-  border: 1px solid #1e293b;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: 10px;
   padding: 14px;
   display: flex;
@@ -1394,7 +1395,7 @@ h3 {
 .matrix-title {
   font-size: 0.8rem;
   font-weight: 700;
-  color: #cbd5e1;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.4px;
 }
@@ -1407,7 +1408,7 @@ h3 {
 
 .group-tag {
   font-size: 0.72rem;
-  color: #64748b;
+  color: var(--text-dim);
   font-weight: 600;
 }
 
@@ -1430,10 +1431,10 @@ h3 {
 .pin-num { font-size: 0.75rem; font-weight: 700; }
 .pin-state { font-size: 0.65rem; }
 
-.pin-idle { background: #1e293b; color: #64748b; }
-.pin-testing { background: #172554; color: #60a5fa; border: 1px solid #3b82f6; }
-.pin-pass { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.4); }
-.pin-fail { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid #ef4444; }
+.pin-idle { background: var(--bg-surface-elevated); color: var(--text-muted); border: 1px solid var(--border-subtle); }
+.pin-testing { background: var(--badge-running-bg); color: var(--badge-running-text); border: 1px solid #3b82f6; }
+.pin-pass { background: var(--pin-pass-bg); color: var(--badge-success-text); border: 1px solid var(--pin-pass-border); }
+.pin-fail { background: var(--pin-fail-bg); color: var(--badge-danger-text); border: 1px solid #ef4444; }
 
 /* Alert Banner */
 .diag-banner {
@@ -1444,8 +1445,8 @@ h3 {
   align-items: center;
   gap: 12px;
 }
-.pass-banner { background: rgba(16, 185, 129, 0.15); border: 1px solid #10b981; color: #34d399; }
-.fail-banner { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171; }
+.pass-banner { background: var(--pin-pass-bg); border: 1px solid #10b981; color: var(--badge-success-text); }
+.fail-banner { background: var(--pin-fail-bg); border: 1px solid #ef4444; color: var(--badge-danger-text); }
 .banner-icon { display: flex; align-items: center; justify-content: center; }
 .banner-status-svg { width: 22px; height: 22px; }
 .banner-text strong { display: block; font-size: 0.92rem; margin-bottom: 2px; }
@@ -1474,7 +1475,7 @@ h3 {
 .form-group label {
   font-size: 0.8rem;
   font-weight: 600;
-  color: #cbd5e1;
+  color: var(--text-secondary);
 }
 
 .form-row-2col {
@@ -1484,13 +1485,14 @@ h3 {
 }
 
 .text-input {
-  background: #0f172a;
-  border: 1px solid #334155;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-control);
   padding: 10px 12px;
   border-radius: 8px;
-  color: white;
+  color: var(--text-primary);
   font-size: 0.88rem;
 }
+.text-input::placeholder { color: var(--text-dim); }
 .text-input:focus { outline: none; border-color: #3b82f6; }
 
 .file-input-hidden { display: none; }
@@ -1501,31 +1503,31 @@ h3 {
   justify-content: center;
   gap: 10px;
   padding: 14px;
-  background: #0f172a;
-  border: 2px dashed #334155;
+  background: var(--bg-surface);
+  border: 2px dashed var(--border-control);
   border-radius: 8px;
   cursor: pointer;
   font-size: 0.88rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   transition: all 0.2s ease;
 }
 .file-upload-dropzone:hover {
   border-color: #3b82f6;
-  color: #e2e8f0;
-  background: #172554;
+  color: var(--text-primary);
+  background: var(--bg-surface-hover);
 }
 
 .upload-icon-svg {
   width: 24px;
   height: 24px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .loaded-firmware-banner {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #1e293b;
+  background: var(--bg-surface-elevated);
   border: 1px solid #3b82f6;
   padding: 10px 14px;
   border-radius: 8px;
@@ -1535,19 +1537,19 @@ h3 {
   align-items: center;
   gap: 8px;
   font-size: 0.88rem;
-  color: #f1f5f9;
+  color: var(--text-heading);
 }
 .file-icon-svg {
   width: 20px;
   height: 20px;
-  color: #60a5fa;
+  color: var(--color-link);
 }
-.file-name { color: #94a3b8; font-size: 0.82rem; }
+.file-name { color: var(--text-muted); font-size: 0.82rem; }
 
 .btn-text-clear {
   background: transparent;
   border: none;
-  color: #f87171;
+  color: var(--color-rose);
   font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
@@ -1556,8 +1558,8 @@ h3 {
 
 /* Flashing Progress Bar */
 .flashing-progress-box {
-  background: #0f172a;
-  border: 1px solid #1e293b;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 10px 14px;
   margin-bottom: 16px;
@@ -1568,7 +1570,7 @@ h3 {
 .flashing-progress-bar-bg {
   width: 100%;
   height: 6px;
-  background: #1e293b;
+  background: var(--bg-surface-elevated);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -1581,7 +1583,7 @@ h3 {
   display: flex;
   justify-content: space-between;
   font-size: 0.76rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   font-weight: 600;
 }
 
@@ -1627,18 +1629,19 @@ h3 {
   box-shadow: 0 4px 15px rgba(139, 92, 246, 0.25);
 }
 .btn-save-preset {
-  background: #334155;
-  color: #e2e8f0;
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  border: 1px solid var(--border-subtle);
 }
-.btn-save-preset:hover:not(:disabled) { background: #475569; }
+.btn-save-preset:hover:not(:disabled) { background: var(--btn-secondary-hover); }
 
 .feedback-msg {
   margin: 14px 0 0 0;
   font-size: 0.88rem;
   font-weight: 600;
 }
-.msg-success { color: #34d399; }
-.msg-error { color: #f87171; }
+.msg-success { color: var(--color-emerald); }
+.msg-error { color: var(--color-rose); }
 
 /* =========================================================================
    Serial Monitor Console
@@ -1660,7 +1663,7 @@ h3 {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #64748b;
+  background: var(--text-dim);
 }
 .live-dot.live-active {
   background: #10b981;
@@ -1674,19 +1677,19 @@ h3 {
 }
 
 .btn-icon {
-  background: #1e293b;
-  border: 1px solid #334155;
-  color: #cbd5e1;
+  background: var(--bg-surface-elevated);
+  border: 1px solid var(--border-control);
+  color: var(--text-secondary);
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.78rem;
   cursor: pointer;
 }
-.btn-icon:hover { background: #334155; }
+.btn-icon:hover { background: var(--btn-secondary-hover); }
 
 .autoscroll-toggle {
   font-size: 0.78rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -1694,8 +1697,8 @@ h3 {
 }
 
 .console-wrapper {
-  background: #000;
-  border: 1px solid #1e293b;
+  background: var(--bg-console);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   overflow: hidden;
   margin-bottom: 10px;
@@ -1704,8 +1707,8 @@ h3 {
 .monitor-console {
   width: 100%;
   height: 160px;
-  background: #000;
-  color: #34d399;
+  background: var(--bg-console);
+  color: var(--text-console);
   font-family: 'Consolas', 'Courier New', monospace;
   font-size: 0.82rem;
   line-height: 1.45;
@@ -1714,6 +1717,7 @@ h3 {
   resize: none;
   box-sizing: border-box;
 }
+.monitor-console::placeholder { color: var(--text-dim); }
 .monitor-console:focus { outline: none; }
 
 .command-bar {
@@ -1724,13 +1728,14 @@ h3 {
 .command-input {
   flex-grow: 1;
   padding: 8px 12px;
-  background: #0f172a;
-  border: 1px solid #334155;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-control);
   border-radius: 6px;
-  color: #f1f5f9;
+  color: var(--text-primary);
   font-family: monospace;
   font-size: 0.82rem;
 }
+.command-input::placeholder { color: var(--text-dim); }
 .command-input:focus { outline: none; border-color: #3b82f6; }
 
 .btn-send-cmd {
@@ -1763,7 +1768,7 @@ h3 {
 .user-avatar {
   width: 38px;
   height: 38px;
-  background: #1e293b;
+  background: var(--bg-surface-elevated);
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1772,27 +1777,28 @@ h3 {
 .user-svg {
   width: 20px;
   height: 20px;
-  color: #94a3b8;
+  color: var(--text-muted);
 }
 
 .user-info h4 {
   margin: 0;
   font-size: 0.95rem;
-  color: #f1f5f9;
+  color: var(--text-heading);
 }
 
 .user-status-pill {
   font-size: 0.72rem;
-  color: #34d399;
-  background: rgba(16, 185, 129, 0.15);
+  color: var(--badge-success-text);
+  background: var(--pin-pass-bg);
   padding: 2px 6px;
   border-radius: 4px;
+  font-weight: 600;
 }
 
 .btn-logout {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: var(--pin-fail-bg);
+  color: var(--badge-danger-text);
+  border: 1px solid rgba(239, 68, 68, 0.35);
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 0.8rem;
@@ -1812,8 +1818,9 @@ h3 {
 }
 
 .preset-count-badge {
-  background: #334155;
-  color: #94a3b8;
+  background: var(--bg-surface-elevated);
+  color: var(--text-muted);
+  border: 1px solid var(--border-subtle);
   padding: 2px 8px;
   border-radius: 12px;
   font-size: 0.75rem;
@@ -1829,11 +1836,11 @@ h3 {
   padding-right: 4px;
 }
 .presets-list::-webkit-scrollbar { width: 5px; }
-.presets-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+.presets-list::-webkit-scrollbar-thumb { background: var(--border-control); border-radius: 4px; }
 
 .preset-item-card {
-  background: #0f172a;
-  border: 1px solid #1e293b;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
   border-radius: 10px;
   padding: 12px;
   display: flex;
@@ -1843,11 +1850,11 @@ h3 {
 }
 .preset-item-card:hover {
   border-color: #3b82f6;
-  background: #172554;
+  background: var(--bg-surface-hover);
 }
 .preset-item-card.active-preset {
   border-color: #10b981;
-  background: rgba(16, 185, 129, 0.08);
+  background: var(--pin-pass-bg);
 }
 
 .preset-header-row {
@@ -1856,18 +1863,18 @@ h3 {
   align-items: center;
 }
 .preset-title {
-  color: #f1f5f9;
+  color: var(--text-heading);
   font-size: 0.88rem;
 }
 .preset-date {
   font-size: 0.72rem;
-  color: #64748b;
+  color: var(--text-dim);
 }
 
 .preset-desc {
   margin: 0;
   font-size: 0.78rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   line-height: 1.35;
 }
 
@@ -1880,29 +1887,29 @@ h3 {
 
 .firmware-tag {
   font-size: 0.7rem;
-  color: #a855f7;
-  background: rgba(168, 85, 247, 0.15);
+  color: var(--tag-purple-text);
+  background: var(--tag-purple-bg);
   padding: 2px 6px;
   border-radius: 4px;
   font-weight: 600;
 }
 
 .btn-load-preset {
-  background: #334155;
-  color: #e2e8f0;
-  border: none;
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+  border: 1px solid var(--border-subtle);
   padding: 4px 10px;
   border-radius: 6px;
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
 }
-.btn-load-preset:hover { background: #475569; }
+.btn-load-preset:hover { background: var(--btn-secondary-hover); }
 
 .empty-presets-state {
   text-align: center;
   padding: 30px 10px;
-  color: #64748b;
+  color: var(--text-dim);
 }
 .empty-icon {
   margin-bottom: 8px;
@@ -1912,28 +1919,28 @@ h3 {
 .empty-svg {
   width: 38px;
   height: 38px;
-  color: #475569;
+  color: var(--text-muted);
 }
-.empty-presets-state p { margin: 0; font-size: 0.88rem; color: #94a3b8; }
+.empty-presets-state p { margin: 0; font-size: 0.88rem; color: var(--text-muted); }
 .empty-sub { font-size: 0.76rem; display: block; margin-top: 4px; }
 
 /* Guide Card */
 .guide-card h4 {
   margin: 0 0 10px 0;
   font-size: 0.88rem;
-  color: #e2e8f0;
+  color: var(--text-heading);
 }
 .guide-list {
   margin: 0;
   padding-left: 18px;
   font-size: 0.78rem;
-  color: #94a3b8;
+  color: var(--text-muted);
   line-height: 1.5;
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
-.guide-list strong { color: #cbd5e1; }
+.guide-list strong { color: var(--text-secondary); }
 
 /* =========================================================================
    Responsive Breakpoints

@@ -81,20 +81,20 @@ export default {
 }
 
 .glass-card {
-  background: rgba(17, 24, 39, 0.9);
+  background: var(--bg-card-auth);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-card);
   padding: 34px;
   border-radius: 16px;
   width: 100%;
   max-width: 400px;
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--shadow-card);
   text-align: center;
 }
 
 h2 {
   margin: 0 0 25px 0;
-  color: #f1f5f9;
+  color: var(--text-heading);
   font-size: 1.5rem;
   font-weight: 700;
 }
@@ -111,16 +111,16 @@ input {
   width: 100%;
   padding: 12px 14px;
   border-radius: 8px;
-  border: 1px solid #334155;
-  background: #0f172a;
-  color: #fff;
+  border: 1px solid var(--border-control);
+  background: var(--bg-surface);
+  color: var(--text-primary);
   font-size: 0.92rem;
   transition: all 0.2s ease;
   box-sizing: border-box;
 }
 
 input::placeholder {
-  color: #64748b;
+  color: var(--text-dim);
 }
 
 input:focus {
@@ -160,7 +160,7 @@ button[type="submit"]:disabled {
   border: none;
   box-shadow: none;
   margin-top: 18px;
-  color: #60a5fa;
+  color: var(--color-link);
   font-size: 0.88rem;
   cursor: pointer;
 }
@@ -176,10 +176,10 @@ p {
 }
 
 .success {
-  color: #34d399;
+  color: var(--color-emerald);
 }
 
 .error {
-  color: #f87171;
+  color: var(--color-rose);
 }
 </style>

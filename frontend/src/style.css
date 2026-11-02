@@ -1,16 +1,116 @@
 /* ==========================================
-   Alapvető betűtípusok és renderelés
+   Alapvető betűtípusok, témák és renderelés
    ========================================== */
 :root {
   --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --heading: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
 
+  /* Dark Theme (Default) */
+  color-scheme: dark;
+  --bg-page: #0b0f19;
+  --bg-topbar: rgba(15, 23, 42, 0.85);
+  --bg-card: rgba(17, 24, 39, 0.85);
+  --bg-card-auth: rgba(17, 24, 39, 0.9);
+  --bg-surface: #0f172a;
+  --bg-surface-elevated: #1e293b;
+  --bg-surface-hover: #172554;
+  --bg-console: #000000;
+  --text-console: #34d399;
+
+  --border-card: rgba(255, 255, 255, 0.08);
+  --border-subtle: #1e293b;
+  --border-control: #334155;
+
+  --shadow-card: 0 12px 30px rgba(0, 0, 0, 0.4);
+  --shadow-topbar: 0 4px 20px rgba(0, 0, 0, 0.35);
+  --shadow-inset: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+
+  --text-primary: #f8fafc;
+  --text-heading: #f1f5f9;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --text-dim: #64748b;
+
+  --color-emerald: #34d399;
+  --color-amber: #fbbf24;
+  --color-rose: #f87171;
+  --color-cyan: #38bdf8;
+  --color-violet: #a78bfa;
+  --color-link: #60a5fa;
+
+  --btn-secondary-bg: #334155;
+  --btn-secondary-hover: #475569;
+  --btn-secondary-text: #e2e8f0;
+
+  --badge-running-bg: rgba(59, 130, 246, 0.2);
+  --badge-running-text: #60a5fa;
+  --badge-success-bg: rgba(16, 185, 129, 0.2);
+  --badge-success-text: #34d399;
+  --badge-danger-bg: rgba(239, 68, 68, 0.2);
+  --badge-danger-text: #f87171;
+
+  --pin-pass-bg: rgba(16, 185, 129, 0.15);
+  --pin-pass-border: rgba(16, 185, 129, 0.4);
+  --pin-fail-bg: rgba(239, 68, 68, 0.2);
+  --tag-purple-bg: rgba(168, 85, 247, 0.15);
+  --tag-purple-text: #a855f7;
+
   font-family: var(--sans);
-  color-scheme: dark; /* Megmondjuk a böngészőnek, hogy sötét témát használunk */
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg-page: #f1f5f9;
+  --bg-topbar: rgba(255, 255, 255, 0.94);
+  --bg-card: #ffffff;
+  --bg-card-auth: #ffffff;
+  --bg-surface: #f8fafc;
+  --bg-surface-elevated: #e2e8f0;
+  --bg-surface-hover: #eff6ff;
+  --bg-console: #f8fafc;
+  --text-console: #047857;
+
+  --border-card: #cbd5e1;
+  --border-subtle: #cbd5e1;
+  --border-control: #94a3b8;
+
+  --shadow-card: 0 4px 14px rgba(15, 23, 42, 0.06);
+  --shadow-topbar: 0 2px 10px rgba(15, 23, 42, 0.06);
+  --shadow-inset: inset 0 1px 2px rgba(15, 23, 42, 0.08);
+
+  --text-primary: #0f172a;
+  --text-heading: #0f172a;
+  --text-secondary: #1e293b;
+  --text-muted: #475569;
+  --text-dim: #64748b;
+
+  --color-emerald: #047857;
+  --color-amber: #b45309;
+  --color-rose: #dc2626;
+  --color-cyan: #0369a1;
+  --color-violet: #6d28d9;
+  --color-link: #2563eb;
+
+  --btn-secondary-bg: #e2e8f0;
+  --btn-secondary-hover: #cbd5e1;
+  --btn-secondary-text: #0f172a;
+
+  --badge-running-bg: #dbeafe;
+  --badge-running-text: #1d4ed8;
+  --badge-success-bg: #d1fae5;
+  --badge-success-text: #047857;
+  --badge-danger-bg: #fee2e2;
+  --badge-danger-text: #b91c1c;
+
+  --pin-pass-bg: #d1fae5;
+  --pin-pass-border: #10b981;
+  --pin-fail-bg: #fee2e2;
+  --tag-purple-bg: #f3e8ff;
+  --tag-purple-text: #7e22ce;
 }
 
 /* ==========================================
@@ -19,16 +119,15 @@
 body {
   margin: 0;
   padding: 0;
-  background-color: #0f172a; /* Elegáns sötétkék háttér, ami passzol a kártyákhoz */
-  color: #e5e7eb;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 /* ==========================================
    A fő Vue alkalmazás konténere (#app)
    ========================================== */
 #app {
-  /* Itt a varázslat: a 'block' biztosítja, hogy fentről lefelé építkezzünk, 
-     ne pedig a képernyő közepére akarjon mindent bezsúfolni */
   display: block; 
   width: 100%;
   min-height: 100vh;
@@ -38,19 +137,18 @@ body {
 /* ==========================================
    A főcím (Arduino Control Panel)
    ========================================== */
-
 h1 {
   font-family: var(--heading);
   font-weight: 600;
   text-align: center;
-  padding-top: 20px; /* 40px-ről lecsökkentve */
+  padding-top: 20px;
   margin-top: 0;
-  margin-bottom: 5px; /* Kisebb távolság a panelektől */
-  font-size: 2rem; /* 2.5rem-ről kisebbre */
-  color: #f3f4f6;
+  margin-bottom: 5px;
+  font-size: 2rem;
+  color: var(--text-heading);
   letter-spacing: -0.5px;
 }
-/* Mobil reszponzivitás a főcímhez */
+
 @media (max-width: 768px) {
   h1 {
     font-size: 2rem;
